@@ -1,0 +1,16 @@
+#!/bin/zsh
+# EPUB2/3 -> modern, validated EPUB3.  Runs the pipeline with Sigil's bundled Python.
+#   ./epub3 run   LIBRARY_DIR [--dry] [--jobs N] [book.epub ...]
+#   ./epub3 audit LIBRARY_DIR        # epubcheck every book
+#   ./epub3 ace   LIBRARY_DIR        # Ace by DAISY accessibility scan
+set -e
+HERE="${0:A:h}"
+PY=/Applications/Sigil.app/Contents/Frameworks/Python.framework/Versions/3.14/bin/python3
+[[ -x $PY ]] || { echo "Sigil not found: brew install --cask sigil"; exit 1; }
+cmd=$1; shift || true
+case $cmd in
+  run)   exec $PY "$HERE/run.py" "$@" ;;
+  audit) exec python3 "$HERE/audit.py" "$@" ;;
+  ace)   exec python3 "$HERE/ace_scan.py" "$@" ;;
+  *)     sed -n '2,6p' "$0"; exit 1 ;;
+esac

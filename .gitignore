@@ -1,0 +1,5 @@
+work/
+usr/
+__pycache__/
+*.pyc
+plugins_prefs/
