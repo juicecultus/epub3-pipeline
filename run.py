@@ -19,7 +19,7 @@ AP = argparse.ArgumentParser(description='EPUB2/3 -> modern EPUB3 with validatio
 AP.add_argument('library', help='folder containing .epub files (searched recursively)')
 AP.add_argument('books', nargs='*', help='optional: only these books (paths relative to the library)')
 AP.add_argument('--dry', action='store_true', help='convert + validate into the work folder, change nothing')
-AP.add_argument('--jobs', type=int, default=4)
+AP.add_argument('--jobs', type=int, default=os.cpu_count() or 4)
 ARGS = AP.parse_args()
 LIB = os.path.abspath(os.path.expanduser(ARGS.library))
 NAME = os.path.basename(LIB.rstrip('/'))

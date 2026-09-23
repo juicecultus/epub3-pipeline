@@ -8,7 +8,7 @@ First used on `~/Downloads/Bulk Books`, 23 Sep 2026: 264 of 264 books came out a
 
 - **Sigil** (`brew install --cask sigil`). The pipeline runs the plugin through Sigil's own plugin launcher and bundled Python 3.14, which provides lxml, gumbo and css_parser.
 - **epubcheck** (`brew install epubcheck`, which also pulls in OpenJDK)
-- **Ace by DAISY**, only needed for `./epub3 ace` (`npm install -g @daisy/ace --allow-scripts=puppeteer`)
+- **Ace by DAISY** (optional, not installed by default), only needed for `./epub3 ace` (`npm install -g @daisy/ace --allow-scripts=puppeteer`)
 
 ## Usage
 
