@@ -75,7 +75,9 @@ def content_model(root):
         if n == 'meta':
             ok = ('charset' in a) or ('content' in a and ('name' in a or 'itemprop' in a or 'property' in a))
             he = (a.get('http-equiv') or '').lower()
-            if he == 'content-type' or (not ok and not ('http-equiv' in a and 'content' in a)):
+            # HTML5 keeps only these http-equiv states; XHTML 1.1 leftovers (Content-Style-Type, Content-Language ...) go
+            bad_he = 'http-equiv' in a and he not in ('default-style', 'refresh', 'x-ua-compatible', 'content-security-policy')
+            if he == 'content-type' or bad_he or (not ok and not ('http-equiv' in a and 'content' in a)):
                 el.getparent().remove(el); ch = True; continue
     # at most one <meta charset>
     for m in root.xpath('//*[local-name()="meta"][@charset]')[1:]:
