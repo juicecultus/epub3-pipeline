@@ -172,6 +172,8 @@ def run(files, items, opfp, opf, book_title):
             # 3. empty table headers -> data cells
             if n == 'th' and not ''.join(el.itertext()).replace('\xa0', '').strip() and not len(el):
                 el.tag = H('td'); ch = True
+                for at in ('scope', 'abbr'):      # header-only attributes are invalid on td
+                    el.attrib.pop(at, None)
             # 4. links without an accessible name
             if n == 'a' and el.get('href') is not None and not ''.join(el.itertext()).strip() \
                     and not el.get('aria-label') and not el.xpath('.//*[local-name()="img"][@alt!=""]'):
