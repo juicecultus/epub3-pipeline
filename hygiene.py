@@ -210,6 +210,19 @@ def run(files, items, opfp, opf):
     ids = {}
     for p, root in trees.items():
         if content_model(root): changed.add(p)
+        if p in navpaths:
+            # the EPUB nav-document schema forbids aria-label/aria-labelledby on <nav>
+            # (RSC-005); keep the name as title, which is allowed (see a11y.py step 6)
+            for nv in root.iter(H('nav')):
+                lab = nv.attrib.pop('aria-label', None)
+                ref = nv.attrib.pop('aria-labelledby', None)
+                if lab is None and ref is None: continue
+                if not nv.get('title'):
+                    if not lab and ref:
+                        hit = root.xpath('//*[@id=$i]', i=ref.split()[0])
+                        lab = ' '.join(''.join(hit[0].itertext()).split()) if hit else ''
+                    if lab: nv.set('title', lab)
+                changed.add(p)
         seen = set(root.xpath('//@id'))
         for el in root.iter():
             if not isinstance(el.tag, str): continue
@@ -388,6 +401,7 @@ def run(files, items, opfp, opf):
         x = re.sub(r'\bid="([^"]+)"', lambda m: m.group(0) if XMLNAME.match(m.group(1))
                    else 'id="%s"' % ('id_' + re.sub(r'[^\w.\-]', '_', m.group(1))), x)
         x = re.sub(r'<pageList(?![^>]*\bclass=)', '<pageList class="pagelist"', x)
+        x = re.sub(r'<pageList(?![^>]*\bid=)', '<pageList id="ncx-page-list"', x)  # id is required (RSC-005)
         def csrc(m):
             h = m.group(2); path, sep, frag = h.partition('#')
             if not frag: return m.group(0)
