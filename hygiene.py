@@ -79,6 +79,22 @@ def content_model(root):
             bad_he = 'http-equiv' in a and he not in ('default-style', 'refresh', 'x-ua-compatible', 'content-security-policy')
             if he == 'content-type' or bad_he or (not ok and not ('http-equiv' in a and 'content' in a)):
                 el.getparent().remove(el); ch = True; continue
+    # a <dl> that ends on a bare <dt> (index layouts: terms only, sub-entries in <dd>) is invalid HTML5:
+    # make it an unbulleted list, each <dd> block moved inside the entry above it
+    for dl in list(root.iter(H('dl'))):
+        kids = [c for c in dl if isinstance(c.tag, str)]
+        if kids and _local(kids[-1]) == 'dt' and all(_local(c) in ('dt', 'dd') for c in kids):
+            dl.tag = H('ul')
+            _style(dl, 'list-style: none; padding-left: 0')
+            prev = None
+            for c in kids:
+                if _local(c) == 'dt':
+                    c.tag = H('li'); prev = c
+                elif prev is not None:
+                    c.tag = H('div'); prev.append(c)
+                else:
+                    c.tag = H('li')
+            ch = True
     # at most one <meta charset>
     for m in root.xpath('//*[local-name()="meta"][@charset]')[1:]:
         m.getparent().remove(m); ch = True
@@ -375,6 +391,10 @@ def run(files, items, opfp, opf):
         import uuid
         opf = opf.replace('</metadata>', '<dc:identifier id="%s">urn:uuid:%s</dc:identifier>\n</metadata>'
                           % (uidm.group(1), uuid.uuid4()), 1)
+    # BCP 47 language tags use hyphens: en_GB -> en-GB (OPF-092)
+    opf = re.sub(r'(<dc:language\b[^>]*>)\s*([A-Za-z]{2,3})_([A-Za-z0-9]{2,8})\s*(</dc:language>)',
+                 lambda m: m.group(1) + m.group(2) + '-' + m.group(3) + m.group(4), opf)
+    opf = re.sub(r'(\bxml:lang=")([A-Za-z]{2,3})_([A-Za-z0-9]{2,8})"', r'\1\2-\3"', opf)
     opf = re.sub(r'\s*<reference\b[^>]*/>', gref, opf)
     opf = re.sub(r'\s*<guide>\s*</guide>', '', opf)
     linked = set()
